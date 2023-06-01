@@ -22,3 +22,8 @@ class DB:
             user = await session.get(User, id)
 
         return user
+
+    async def create_user(self, user: User):
+        async with AsyncSession(self.engine) as session:
+            session.add(user)
+            await session.commit()

@@ -1,4 +1,5 @@
 from typing import Optional, AsyncIterator
+import datetime
 
 from sqlmodel import SQLModel, Field, select, delete
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -13,6 +14,7 @@ class User(SQLModel, table=True):
     nickname: str
     state: str = Field(default="start")
     is_admin: bool = Field(default=False)
+    last_activity: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
 class FAQ(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -41,6 +43,7 @@ class DB:
         async with AsyncSession(self.engine) as session:
             session.add(faq)
             await session.commit()
+            await session.refresh(faq)
 
     async def get_faq(self, category = None, faqid: Optional[int] = None) -> list[FAQ]:
         async with AsyncSession(self.engine) as session:
@@ -54,9 +57,17 @@ class DB:
 
         return faq
 
-    async def delete_faqs(self):
+    async def delete_faqs(self, faqid: int | None = None):
         async with AsyncSession(self.engine) as session:
             q = delete(FAQ)
+            if faqid != None:
+                q = q.where(FAQ.id == faqid)
+            await session.exec(q)
+            await session.commit()
+
+    async def delete_unused_faq(self):
+        async with AsyncSession(self.engine) as session:
+            q = delete(FAQ).where(FAQ.category != "main")
             await session.exec(q)
             await session.commit()
 
@@ -66,3 +77,11 @@ class DB:
             session.add(user)
             await session.commit()
             await session.refresh(user)
+
+    async def get_all_user_ids(self) -> list[int]:
+        async with AsyncSession(self.engine) as session:
+            q = select(User)
+            e = await session.exec(q)
+            users = e.all()
+
+        return list(map(lambda u: u.id, users))

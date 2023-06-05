@@ -1,6 +1,6 @@
 import aiogram
 from aiogram.types import Message
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from modules import dialogs
 from modules.db import FAQ
 
 from modules.dbtg import DBTG
@@ -29,6 +29,8 @@ class Commands:
         @self.dp.message_handler(commands=["create"])
         async def create(message: Message):
             user = await self.db.get_user(message.from_user)
+            if not user.is_admin:
+                return
             faq = FAQ(question="", answer="", category="onedit")
             await self.db.db.append_faq(faq)
             await self.db.db.set_user_state(user, f"editfaq_title_{faq.id}")
@@ -37,8 +39,34 @@ class Commands:
         @self.dp.message_handler(commands=["edit"])
         async def edit(message: Message):
             user = await self.db.get_user(message.from_user)
-            keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-            for q in basic_dialog.keys():
-                keyboard.add(q)
-            keyboard = await self.rk.get("main")
-            await message.answer(config.greeting, reply_markup=keyboard)
+            if not user.is_admin:
+                return
+            keyboard = InlineKeyboard(self.db)
+
+            await message.answer(dialogs.config.edit_msg, "HTML", reply_markup=await keyboard.get("faq_info"))
+        
+        @self.dp.message_handler(commands=["delete"])
+        async def delete(message: Message):
+            user = await self.db.get_user(message.from_user)
+            if not user.is_admin:
+                return
+            keyboard = InlineKeyboard(self.db)
+
+            await self.db.db.delete_unused_faq()
+            await message.answer(dialogs.config.delete_msg, "HTML", reply_markup=await keyboard.get("faq_delete"))
+        
+        @self.dp.message_handler(commands=["cancel"])
+        async def cancel(message: Message):
+            user = await self.db.get_user(message.from_user)
+
+            await self.db.db.set_user_state(user, "main")
+            await message.answer("Действие отменено", "HTML")
+        
+        @self.dp.message_handler(commands=["post"])
+        async def post(message: Message):
+            user = await self.db.get_user(message.from_user)
+            if not user.is_admin:
+                return
+
+            await self.db.db.set_user_state(user, "post_image")
+            await message.answer("Отправьте картинку для поста, или отправьте любой текст для поста без картинки", "HTML")

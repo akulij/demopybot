@@ -1,6 +1,10 @@
 from modules.dialogs import config
 
-from .tools import get_faqs, get_info_faqs
+from .tools import (
+        get_faqs,
+        get_info_faqs,
+        get_delete_faqs,
+        )
 
 
 reply_keyboards = {
@@ -14,6 +18,7 @@ reply_keyboards = {
 inline_keyboards = {
         "faq_main": get_faqs,
         "faq_info": get_info_faqs,
+        "faq_delete": get_delete_faqs,
         "links": [
             {
                 "type": "link",

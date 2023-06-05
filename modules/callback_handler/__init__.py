@@ -23,4 +23,23 @@ class CallbackHandler:
             faq = faq[0]
 
             await self.dp.bot.send_message(query.message.chat.id, faq.answer, "HTML")
+        
+        @self.dp.callback_query_handler(lambda q: q.data.startswith("info"))
+        async def faqinfo(query: CallbackQuery):
+            user = await self.db.get_user(query.from_user)
+            _, faqid = query.data.split("_")
+            faqid = int(faqid)
+
+            await self.db.db.set_user_state(user, f"editfaq_content_{faqid}")
+            await self.dp.bot.send_message(query.message.chat.id, "Введите ответ на вопрос", "HTML")
+
+        
+        @self.dp.callback_query_handler(lambda q: q.data.startswith("delete"))
+        async def faqinfo(query: CallbackQuery):
+            user = await self.db.get_user(query.from_user)
+            _, faqid = query.data.split("_")
+            faqid = int(faqid)
+
+            await self.db.db.delete_faqs(faqid=faqid)
+            await self.dp.bot.send_message(query.message.chat.id, "Вопрос удален", "HTML")
 

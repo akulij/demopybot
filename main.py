@@ -11,11 +11,21 @@ class BotRunner:
         self.init_modules()
 
     def init_modules(self):
-        from modules import dialogs
+        from modules import (
+                dialogs,
+                callback_handler,
+                commands,
+                userstat,
+                )
         from modules.db import DB
         from modules.dbtg import DBTG
+        db = DB(self.config)
+        dbtg = DBTG(db)
         active = [
-                dialogs.DialogConfigurer(self.dp, DBTG(DB(self.config)))
+                commands.Commands(self.dp, dbtg),
+                dialogs.DialogConfigurer(self.dp, dbtg),
+                callback_handler.CallbackHandler(self.dp, dbtg),
+                userstat.UserStat(self.dp, dbtg)
                 ]
 
 

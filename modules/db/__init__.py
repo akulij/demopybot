@@ -11,11 +11,14 @@ class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     nickname: str
+    state: str = Field(default="start")
+    is_admin: bool = Field(default=False)
 
 class FAQ(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     question: str = Field(unique=True)
     answer: str
+    category: str
 
 
 class DB:
@@ -38,9 +41,13 @@ class DB:
             session.add(faq)
             await session.commit()
 
-    async def get_faq(self):
+    async def get_faq(self, category = None, faqid: Optional[int] = None) -> list[FAQ]:
         async with AsyncSession(self.engine) as session:
             q = select(FAQ)
+            if category:
+                q = q.where(FAQ.category == category)
+            if faqid:
+                q = q.where(FAQ.id == faqid)
             e = await session.exec(q)
             faq = e.all()
 
@@ -52,3 +59,9 @@ class DB:
             await session.exec(q)
             await session.commit()
 
+    async def set_user_state(self, user: User, state: str):
+        user.state = state
+        async with AsyncSession(self.engine) as session:
+            session.add(user)
+            await session.commit()
+            await session.refresh(user)

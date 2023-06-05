@@ -35,6 +35,7 @@ class DB:
         async with AsyncSession(self.engine) as session:
             session.add(user)
             await session.commit()
+            await session.refresh(user)
 
     async def append_faq(self, faq: FAQ):
         async with AsyncSession(self.engine) as session:

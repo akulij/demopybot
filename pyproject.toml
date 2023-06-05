@@ -7,7 +7,6 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-modules = { path = "./modules" }
 aiogram = "^2.25.1"
 sqlmodel = "^0.0.8"
 asyncpg = "^0.27.0"

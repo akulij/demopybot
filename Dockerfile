@@ -1,13 +1,17 @@
 FROM python:3.10
 
-WORKDIR /usr/src/app
+WORKDIR /code
+COPY poetry.lock pyproject.toml /code/
+COPY alembic alembic.ini /code/
 
-COPY requirements.txt ./
-RUN pip install poetry
+RUN pip install poetry alembic
 RUN python -m poetry config virtualenvs.in-project true
 RUN python -m poetry install
-RUN source .venv/bin/activate
+RUN python -m poetry export -f requirements.txt --output requirements.txt
 
 COPY . .
 
-CMD [ "python", "main.py" ]
+RUN pip install -r requirements.txt
+
+ENTRYPOINT ["/code/docker-entrypoint.sh"]
+# CMD ["python"]

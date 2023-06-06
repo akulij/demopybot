@@ -1,5 +1,25 @@
+version: '3.8'
 services:
+  db:
+    container_name: db
+    image: "postgres:alpine"
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    expose:
+      - 5432
+    ports:
+      - '5432:5432'
+    volumes: 
+      - db:/var/lib/postgresql/data
   bot:
     build: .
-  postgres:
-    image: "postgres:latest"
+    links:
+      - db
+    depends_on:
+      - db
+volumes:
+  db:
+    driver: local

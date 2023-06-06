@@ -12,7 +12,7 @@ from modules.config import Settings
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True, sa_column=Column(BigInteger(), primary_key=True))
     name: str
-    nickname: str
+    nickname: Optional[str]
     state: str = Field(default="start")
     is_admin: bool = Field(default=False)
     last_activity: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)

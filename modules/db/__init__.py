@@ -19,7 +19,7 @@ class User(SQLModel, table=True):
 
 class FAQ(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    question: str = Field(unique=True)
+    question: str
     answer: str
     category: str
 

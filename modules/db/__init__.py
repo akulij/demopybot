@@ -1,15 +1,16 @@
 from typing import Optional, AsyncIterator
 import datetime
 
-from sqlmodel import SQLModel, Field, select, delete
+from sqlmodel import Column, SQLModel, Field, select, delete
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy import BigInteger
 
 from modules.config import Settings
 
 
 class User(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True, sa_column=Column(BigInteger(), primary_key=True))
     name: str
     nickname: str
     state: str = Field(default="start")

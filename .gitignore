@@ -1,6 +1,5 @@
 env/
 .env
 __pycache__
-alembic/versions/*
 .DS_Store
 post.png

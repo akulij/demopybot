@@ -1,3 +1,5 @@
+import datetime
+
 import aiogram
 from aiogram.types import Message
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
@@ -17,6 +19,9 @@ class LoggingMiddleware(BaseMiddleware):
     async def on_process_message(self, message: Message, data: dict):
         print(f"New message: {message.text}")
         print(f"Data: {data}")
+        user = await self.db.get_user(message.from_user)
+        user.last_activity = datetime.datetime.utcnow()
+        await self.db.db.create_user(user)
 
 class UserStat:
     def __init__(self, dispatcher: aiogram.Dispatcher, db_provider: DBTG):

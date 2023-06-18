@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     qiwi_token: str = Field(env="QIWI_TOKEN")
     bot_token: str = Field(env="BOTTOKEN")
     support_chatid: int = Field(env="SUPPORT_CHATID")
+    botname: str = Field(env="BOTNAME")
 
     class Config:
         env_file = ".env"

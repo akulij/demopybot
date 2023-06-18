@@ -20,6 +20,7 @@ class LoggingMiddleware(BaseMiddleware):
         print(f"New message: {message.text}")
         print(f"Data: {data}")
         user = await self.db.get_user(message.from_user)
+        await self.db.db.new_action(user, "message", {"message": message.text})
         user.last_activity = datetime.datetime.utcnow()
         await self.db.db.create_user(user)
 

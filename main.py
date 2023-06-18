@@ -33,4 +33,4 @@ if __name__ == '__main__':
     from aiogram import executor
     from modules.config import config
     bot = BotRunner(config)
-    executor.start_polling(bot.dp, skip_updates=True)
+    executor.start_polling(bot.dp, skip_updates=False)

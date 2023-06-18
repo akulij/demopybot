@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 from modules.dbtg import DBTG
-from modules.db import User
+from modules.db import UserV1
 
 from . import config
 from .config import reply_keyboards, inline_keyboards
@@ -15,7 +15,7 @@ class ReplyKeyboard:
     def __init__(self, db_provider: DBTG):
         self.db = db_provider
 
-    async def get(self, keyboard_name: str, user: Optional[User] = None):
+    async def get(self, keyboard_name: str, user: Optional[UserV1] = None):
         assert keyboard_name in reply_keyboards.keys()
 
         keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -31,7 +31,7 @@ class InlineKeyboard:
     def __init__(self, db_provider: DBTG):
         self.db = db_provider
 
-    async def get(self, keyboard_name: str, user: Optional[User] = None):
+    async def get(self, keyboard_name: str, user: Optional[UserV1] = None):
         print(f"KN: {keyboard_name}")
         assert keyboard_name in inline_keyboards.keys()
 

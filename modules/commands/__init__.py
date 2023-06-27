@@ -61,6 +61,10 @@ class Commands:
 
             await self.db.db.set_user_state(user, "main")
             await message.answer("Действие отменено", "HTML")
+
+        @self.dp.message_handler(commands=["there"])
+        async def there(message: Message):
+            print(message.chat.id)
         
         @self.dp.message_handler(commands=["post"])
         async def post(message: Message):

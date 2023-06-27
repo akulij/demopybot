@@ -9,8 +9,11 @@ from .tools import (
 
 reply_keyboards = {
         "main": [
+            config.dropship,
             config.ihavequestion,
-            config.wheretobuy,
+            config.prices,
+            config.our_chat,
+            config.referal,
             config.support,
             ]
         }

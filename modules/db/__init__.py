@@ -1,8 +1,10 @@
 from typing import Optional, AsyncIterator
 import datetime
+from urllib.parse import uses_params
 
 from sqlmodel import Column, SQLModel, Field, select, delete, JSON, table
 from sqlalchemy.ext.asyncio import create_async_engine
+from sqlmodel.engine.result import ScalarResult
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy import BigInteger, desc
 
@@ -57,6 +59,18 @@ class DB:
     def __init__(self, config: Settings):
         self.engine = create_async_engine(config.database_uri)
         self.config = config
+
+    async def _update_instance(self, instance: SQLModel):
+        async with AsyncSession(self.engine) as session:
+            session.add(instance)
+            await session.commit()
+            await session.refresh(instance)
+
+    async def _exec_query(self, q) -> ScalarResult:
+        async with AsyncSession(self.engine) as session:
+            e = await session.exec(q)
+
+        return e
 
     async def new_action(self, user: UserV1, actiontype: str, actionjson: dict):
         action = ActionV1(
@@ -197,8 +211,106 @@ class DB:
         return e.all()
 
     async def set_message_sended(self, userid: int, botname: str, message: str):
-        user = await self.get_user_byid(userid)
-        a = ActionV1(bot=botname, username=user.name, userid=userid, actiontype="send_message", actionjson={"message": message})
+        user: UserV1 = await self.get_user_byid(userid)
+        a = ActionV1(bot=botname,
+                     username=user.name,
+                     userid=userid,
+                     actiontype="send_message",
+                     actionjson={"message": message},
+                     time=datetime.datetime.utcnow())
         async with AsyncSession(self.engine) as session:
-            pass
+            session.add(a)
+            await session.commit()
+            await session.refresh(a)
+
+    async def check_password(self, botname: str, password: str):
+        q = select(BotOwner).where(BotOwner.botname == botname)
+        cred = (await self._exec_query(q)).first()
+        if not cred: return False
+
+        if cred.password == password: return True
+
+        return False
+
+    async def get_new_users_per_day(self, botname: str, days: int = 5):
+        stat = []
+
+        mindate = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min.time())
+        maxdate = datetime.datetime.utcnow()
+        for _ in range(days):
+            q = select(ActionV1).where(ActionV1.bot == botname).where(ActionV1.actiontype == "register").where((ActionV1.time > mindate) & (ActionV1.time <= maxdate))
+            e = await self._exec_query(q)
+            actions: list[ActionV1] = e.all()
+            
+            stat.append({
+                    "day": mindate.day,
+                    "users": list(map(lambda a: a.username, actions))
+                })
+
+            maxdate = mindate
+            mindate -= datetime.timedelta(days=1)
+
+        return stat
+
+    async def get_new_users_total(self, botname: str, days: int = 5):
+        stat = []
+
+        mindate = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min.time())
+        for _ in range(days):
+            q = select(ActionV1).where(ActionV1.bot == botname).where(ActionV1.actiontype == "register").where(ActionV1.time > mindate)
+            e = await self._exec_query(q)
+            actions: list[ActionV1] = e.all()
+            
+            stat.append({
+                    "day": mindate.day,
+                    "users": len(list(map(lambda a: a.username, actions)))
+                })
+
+            mindate -= datetime.timedelta(days=1)
+
+        return stat
+
+    async def get_active_users_per_day(self, botname: str, days: int = 5):
+        stat = []
+
+        mindate = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min.time())
+        maxdate = datetime.datetime.utcnow()
+        for _ in range(days):
+            q = select(ActionV1).where(ActionV1.bot == botname).where(ActionV1.actiontype == "message").where((ActionV1.time > mindate) & (ActionV1.time <= maxdate))
+            e = await self._exec_query(q)
+            actions: list[ActionV1] = e.all()
+            print(actions, flush=True)
+            print(f"{len(set(map(lambda a: a.username, actions)))=}")
+            
+            stat.append({
+                    "day": mindate.day,
+                    "users": len(set(map(lambda a: a.username, actions)))
+                })
+
+            maxdate = mindate
+            mindate -= datetime.timedelta(days=1)
+
+        return stat
+
+    async def get_active_users_per_hours(self, botname: str):
+        stat = []
+
+        for delta in (1, 6, 12, 24):
+            q = select(ActionV1).where(ActionV1.bot == botname).where(ActionV1.actiontype == "message").where(ActionV1.time > (datetime.datetime.utcnow() - datetime.timedelta(hours=delta)))
+            e = await self._exec_query(q)
+            actions: list[ActionV1] = e.all()
+            print(actions, flush=True)
+            
+            stat.append({
+                    "day": f"{delta}h",
+                    "users": len(set(map(lambda a: a.username, actions)))
+                })
+
+        return stat
+
+    async def get_inactive_users(self) -> list[int]:
+        q = select(ActionV1.userid).where((ActionV1.actiontype == "message") | (ActionV1.actiontype == "send_message")).where(ActionV1.time < (datetime.datetime.utcnow() - datetime.timedelta(hours=24)))
+        e = await self._exec_query(q)
+
+        return list(set(e.all()))
 

@@ -9,13 +9,14 @@ class DBTG:
     def __init__(self, db_provider: DB):
         self.db = db_provider
 
-    async def get_user(self, aiogram_user: AiogramUser) -> UserV1:
+    async def get_user(self, aiogram_user: AiogramUser, start_args: str = "") -> UserV1:
         au = aiogram_user
         user = await self.db.get_user_byid(au.id)
         if not user:
             user = UserV1(id=au.id, name=au.first_name, nickname=au.username)
             await self.db.create_user(user)
-            await self.db.new_action(user, "register", actionjson={})
+            print(f"link: {start_args}")
+            await self.db.new_action(user, "register", actionjson={"link": start_args})
 
             return user
 

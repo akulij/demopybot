@@ -16,6 +16,7 @@ class BotRunner:
                 callback_handler,
                 commands,
                 userstat,
+                joinrequest,
                 )
         from modules.db import DB
         from modules.dbtg import DBTG
@@ -25,7 +26,8 @@ class BotRunner:
                 commands.Commands(self.dp, dbtg),
                 dialogs.DialogConfigurer(self.dp, dbtg),
                 callback_handler.CallbackHandler(self.dp, dbtg),
-                userstat.UserStat(self.dp, dbtg)
+                userstat.UserStat(self.dp, dbtg),
+                joinrequest.JoinRequest(self.dp, dbtg),
                 ]
 
 

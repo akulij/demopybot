@@ -34,7 +34,9 @@ class DialogConfigurer:
         
         @self.dp.message_handler(commands=["start"])
         async def start(message: Message):
-            user = await self.db.get_user(message.from_user)
+            args = message.get_args() if message.get_args() else ""
+            print(args)
+            user = await self.db.get_user(message.from_user, start_args=str(args))
             keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
             for q in basic_dialog.keys():
                 keyboard.add(q)
@@ -84,6 +86,10 @@ class DialogConfigurer:
                     if type(answer) == str:
                         await message.answer(answer)
                     elif type(answer) == dict:
+                        if "file" in answer.keys():
+                            file = answer["file"]
+                            await self.dp.bot.send_document(message.from_user.id, file, caption=answer["text"])
+                            return
                         keyboard = None
                         if "keyboard_inline" in answer.keys():
                             keyboard = await self.ik.get(answer["keyboard_inline"])

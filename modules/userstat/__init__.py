@@ -19,7 +19,10 @@ class LoggingMiddleware(BaseMiddleware):
     async def on_process_message(self, message: Message, data: dict):
         print(f"New message: {message.text}")
         print(f"Data: {data}")
-        user = await self.db.get_user(message.from_user)
+        args = ""
+        if message.text.startswith("/start"):
+            args = message.get_args()
+        user = await self.db.get_user(message.from_user, start_args=args)
         await self.db.db.new_action(user, "message", {"message": message.text})
         user.last_activity = datetime.datetime.utcnow()
         await self.db.db.create_user(user)

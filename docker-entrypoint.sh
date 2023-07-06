@@ -1,6 +1,5 @@
 #!/bin/bash
 
-python -m alembic upgrade head
-
 source .venv/bin/activate
+python faqmigrate.py
 python ./main.py

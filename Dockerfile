@@ -2,9 +2,10 @@ FROM python:3.10
 
 WORKDIR /code
 COPY poetry.lock pyproject.toml /code/
-COPY alembic alembic.ini /code/
+# COPY alembic alembic.ini /code/
 
-RUN pip install poetry alembic
+# RUN pip install poetry alembic
+RUN pip install poetry
 RUN python -m poetry config virtualenvs.in-project true
 RUN python -m poetry install
 RUN python -m poetry export -f requirements.txt --output requirements.txt

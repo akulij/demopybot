@@ -79,12 +79,17 @@ class DialogConfigurer:
                 await notificate_users(message.html_text, imgtype, self.db.db, self.dp)
                 await message.answer("Все пользователи уведомлены!")
             else:
+                userfmt = {
+                    "userid": message.from_user.id,
+                    "balance": float(0),
+                    "first_name": message.from_user.first_name,
+                }
                 if message.text in basic_dialog.keys():
                     if message.text == config.support:
                         await self.db.db.set_user_state(user, "message_support")
                     answer = basic_dialog[message.text]
                     if type(answer) == str:
-                        await message.answer(answer)
+                        await message.answer(answer.format(**userfmt))
                     elif type(answer) == dict:
                         if "file" in answer.keys():
                             file = answer["file"]
@@ -92,8 +97,9 @@ class DialogConfigurer:
                             return
                         keyboard = None
                         if "keyboard_inline" in answer.keys():
-                            keyboard = await self.ik.get(answer["keyboard_inline"])
-                        await message.answer(answer["text"], reply_markup=keyboard)
+                            user = await self.db.get_user(message.from_user)
+                            keyboard = await self.ik.get(answer["keyboard_inline"], user)
+                        await message.answer(answer["text"].format(**userfmt), reply_markup=keyboard)
                     else:
                         raise NotImplemented
 

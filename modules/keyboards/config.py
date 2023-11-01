@@ -1,42 +1,33 @@
 from modules.dialogs import config
 
 from .tools import (
-        get_faqs,
-        get_info_faqs,
-        get_delete_faqs,
+        get_bots_ikbd,
         )
 
 
 reply_keyboards = {
         "main": [
-            config.dropship,
-            config.ihavequestion,
-            config.prices,
-            config.our_chat,
-            config.referal,
+            config.bots,
+            config.tarifs,
+            config.boost,
+            config.info,
+            config.account,
             config.support,
             ]
         }
 
 inline_keyboards = {
-        "faq_main": get_faqs,
-        "faq_info": get_info_faqs,
-        "faq_delete": get_delete_faqs,
-        "links": [
+        "botscfg": get_bots_ikbd,
+        "telegraph_links": [
             {
                 "type": "link",
-                "title": "ЭкосГум",
-                "link": "www.ecosgum.ru",
+                "title": "Ссылка 1",
+                "link": "google.com",
                 },
             {
                 "type": "link",
-                "title": "Экос",
-                "link": "www.pribavka-ecos.ru",
-                },
-            {
-                "type": "link",
-                "title": "Озон",
-                "link": "https://www.ozon.ru/seller/pribavka-212052/products/?miniapp=seller_212052",
+                "title": "Ссылка 2",
+                "link": "yandex.ru",
                 },
             ]
         }

@@ -43,3 +43,7 @@ class CallbackHandler:
             await self.db.db.delete_faqs(faqid=faqid)
             await self.dp.bot.send_message(query.message.chat.id, "Вопрос удален", "HTML")
 
+        
+        @self.dp.callback_query_handler(lambda q: q == "bots_add_chat")
+        async def faqinfo(query: CallbackQuery):
+             await self.dp.bot.send_message(query.message.chat.id, "Отправьте файл с чатами", "HTML")
